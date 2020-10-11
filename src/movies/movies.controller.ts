@@ -1,4 +1,5 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, Query  } from '@nestjs/common';
+import { CreateMovieDto } from './dto/create-movie.dto';
 import { Movie } from './entities/movie.entity';
 import { MoviesService } from './movies.service';
 
@@ -33,27 +34,30 @@ export class MoviesController {
     // localhost:3000/movies/1 이런식으로 값을 전달함 
     // @Param("paramId")에서 paramId라는 파라미터를 전달받아서 
     // string type의 movieId 라는 argument에 저장
+    //   app.useGlobalPipes(new ValidationPipe({transform:true}) 이 설정 덕분에 자동으로 movieId를 string 에서 number형식으로 변환해줌
     @Get(":paramId")
-    getOne(@Param("paramId") movieId:string) : Movie{
+    getOne(@Param("paramId") movieId:number) : Movie{
+        console.log(typeof movieId);
         return this.moviesService.getOne(movieId);
     }
 
     // Body의 내용을 받고싶을때
     // body안의 json 내용이 있다면 { name: 'Tenet', director: 'nolan' }  이렇게 가져와줌
     @Post()    
-    create(@Body() movieData){        
+    create(@Body() movieData:CreateMovieDto){        
         return this.moviesService.create(movieData);
     }
 
 
+    //   app.useGlobalPipes(new ValidationPipe({transform:true}) 이 설정 덕분에 자동으로 movieId를 string 에서 number형식으로 변환해줌
     @Delete(":paramId")
-    remove(@Param("paramId") movieId:string ){
+    remove(@Param("paramId") movieId:number ){
         return this.moviesService.deleteOne(movieId);
     }
 
     // 리소스 전체를 업데이트 하려면 Put, 리소스 일부분만 업데이트 하려면 @Patch
     @Patch(":id")
-    patch(@Param("id") movieId:string, @Body() updateData){
+    patch(@Param("id") movieId:number, @Body() updateData){
         return this.moviesService.update(movieId, updateData);        
     }
 
