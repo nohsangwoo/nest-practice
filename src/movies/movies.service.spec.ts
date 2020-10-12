@@ -13,6 +13,17 @@ describe('MoviesService', () => {
     }).compile();
 
     service = module.get<MoviesService>(MoviesService);
+
+    // beforeEach에 미리 오브젝트를 생성해 놓고 테스트 할수도있음
+    // service.create({
+    //   title: 'Test2 Movie',
+    //   genres: ['test2'],
+    //   year: 2222,
+    // });
+  });
+
+  afterAll(() => {
+    // 모든 데이터 베이스를 깨끗하게 지워주는 function을 넣을수있음
   });
 
   it('should be defined', () => {
@@ -87,45 +98,72 @@ describe('MoviesService', () => {
         expect(e.message).toEqual('not found Movie with ID : 999');
       }
     });
+  });
 
-    // deleteOne Testing
-    describe('deleteOne', () => {
-      it('delete a movie', () => {
+  // deleteOne Testing
+  describe('deleteOne', () => {
+    it('delete a movie', () => {
+      service.create({
+        title: 'Test2 Movie',
+        genres: ['test2'],
+        year: 2222,
+      });
+
+      const beforeDelete = service.getAll().length;
+      service.deleteOne(1);
+      const afterDelete = service.getAll().length;
+
+      // 삭제한 이후의 getAll값의 길이는 삭제 이전의 getAll의 값보다 적어야 한다
+      expect(afterDelete).toBeLessThan(beforeDelete);
+    });
+    it('should return a empty', () => {
+      try {
+        service.deleteOne(9999);
+      } catch (e) {
+        expect(e).toBeInstanceOf(NotFoundException);
+        expect(e.message).toEqual('Movies data is empty');
+      }
+    });
+
+    it('should return a 404', () => {
+      try {
         service.create({
           title: 'Test2 Movie',
           genres: ['test2'],
           year: 2222,
         });
+        service.deleteOne(9999);
+      } catch (e) {
+        expect(e).toBeInstanceOf(NotFoundException);
+        expect(e.message).toEqual('not found Movie with ID : 9999');
+      }
+    });
+  });
 
-        const beforeDelete = service.getAll().length;
-        service.deleteOne(1);
-        const afterDelete = service.getAll().length;
+  describe('update', () => {
+    it('should update a movie', () => {
+      service.create({
+        title: 'Test2 Movie',
+        genres: ['test2'],
+        year: 2222,
+      });
+      service.update(1, { title: 'update Test' });
+      const movie = service.getOne(1);
+      expect(movie.title).toEqual('update Test');
+    });
 
-        // 삭제한 이후의 getAll값의 길이는 삭제 이전의 getAll의 값보다 적어야 한다
-        expect(afterDelete).toBeLessThan(beforeDelete);
-      });
-      it('should return a empty', () => {
-        try {
-          service.deleteOne(9999);
-        } catch (e) {
-          expect(e).toBeInstanceOf(NotFoundException);
-          expect(e.message).toEqual('Movies data is empty');
-        }
-      });
-
-      it('should return a 404', () => {
-        try {
-          service.create({
-            title: 'Test2 Movie',
-            genres: ['test2'],
-            year: 2222,
-          });
-          service.deleteOne(9999);
-        } catch (e) {
-          expect(e).toBeInstanceOf(NotFoundException);
-          expect(e.message).toEqual('not found Movie with ID : 9999');
-        }
-      });
+    it('should throw a NotFoundException', () => {
+      try {
+        service.create({
+          title: 'Test2 Movie',
+          genres: ['test2'],
+          year: 2222,
+        });
+        service.update(9999, { title: 'update Test' });
+      } catch (e) {
+        expect(e).toBeInstanceOf(NotFoundException);
+        expect(e.message).toEqual('not found Movie with ID : 9999');
+      }
     });
   });
 });
