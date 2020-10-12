@@ -2,7 +2,6 @@ import { Module } from '@nestjs/common';
 import { MoviesModule } from './movies/movies.module';
 import { AppController } from './app.controller';
 
-
 @Module({
   imports: [MoviesModule],
   // controllers url을 호출(매핑)하고 request를 받고 query를 넘기거나  Body를 넘기거나 함수를 실행함
